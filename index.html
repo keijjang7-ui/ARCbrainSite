@@ -53,11 +53,16 @@ img { max-width: 100%; display: block; }
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 100;
-  padding: 20px 40px;
+  padding: 20px 0;
+  display: block;
+  transition: background .25s, backdrop-filter .25s, box-shadow .25s;
+}
+.nav-inner {
+  width: min(calc(100% - 80px), 1240px);
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  transition: background .25s, backdrop-filter .25s, box-shadow .25s;
 }
 .nav.scrolled {
   background: rgba(255,255,255,0.85);
@@ -244,9 +249,10 @@ img { max-width: 100%; display: block; }
 .hero-content {
   position: relative;
   z-index: 2;
-  text-align: center;
-  padding: 0 32px;
-  max-width: 1100px;
+  width: min(calc(100% - 80px), 1240px);
+  text-align: left;
+  padding: 0 0 0 80px;
+  margin: 0 auto;
 }
 .hero .eyebrow {
   display: inline-block;
@@ -262,10 +268,10 @@ img { max-width: 100%; display: block; }
   backdrop-filter: blur(8px);
 }
 .hero h1 {
-  font-size: clamp(40px, 6.5vw, 88px);
+  font-size: clamp(36px, 5.85vw, 79px);
   line-height: 1.05;
   letter-spacing: -2.5px;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 28px;
 }
 .hero h1 .gradient {
@@ -279,14 +285,14 @@ img { max-width: 100%; display: block; }
   font-weight: 400;
   color: rgba(255,255,255,0.88);
   max-width: 640px;
-  margin: 0 auto 44px;
+  margin: 0 0 64px;
   line-height: 1.65;
   letter-spacing: -0.2px;
 }
 .hero .cta-row {
   display: flex;
   gap: 12px;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 .btn {
@@ -1010,8 +1016,10 @@ footer {
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 1360px) {
   .nav {
+    padding: 18px 0;
+  }
+  .nav-inner {
     grid-template-columns: minmax(0, 1fr) auto;
-    padding: 18px 32px;
   }
   .nav .menu { display: none; }
   .menu-button {
@@ -1024,6 +1032,7 @@ footer {
 
 @media (max-width: 1024px) {
   section { padding: 100px 28px; }
+  .hero-content { padding-left: 40px; }
   #features { padding: 100px 28px 80px; }
   .features-head,
   .uc-head { grid-template-columns: 1fr; gap: 32px; }
@@ -1063,7 +1072,8 @@ footer {
 }
 
 @media (max-width: 640px) {
-  .nav { padding: 16px 22px; }
+  .nav { padding: 16px 0; }
+  .nav-inner { width: calc(100% - 44px); }
   .nav .logo { width: 168px; height: 51px; }
   .nav .cta { display: none; }
   .nav-actions { gap: 0; }
@@ -1081,6 +1091,10 @@ footer {
   section { padding: 80px 22px; }
   #features { padding: 80px 22px 60px; }
   .hero { min-height: 600px; }
+  .hero-content {
+    width: calc(100% - 44px);
+    padding-left: 0;
+  }
   .hero h1 { letter-spacing: -1.2px; }
   .section-title { letter-spacing: -1.2px; }
   .problem-lead-break { display: none; }
@@ -1113,8 +1127,9 @@ footer {
 <!-- NAV -->
 <!-- ============================ -->
 <nav class="nav" id="nav">
-  <a href="#hero" class="logo" aria-label="ARC brain">
-    <svg class="logo-mark" width="300" height="90" viewBox="30 0 300 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <div class="nav-inner">
+    <a href="#hero" class="logo" aria-label="ARC brain">
+      <svg class="logo-mark" width="300" height="90" viewBox="30 0 300 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
       <path fill-rule="evenodd" clip-rule="evenodd" d="M49.634 29.1928C49.125 30.0716 48.6536 30.984 48.2327 31.9044L52.9588 34.0586C53.3107 33.2886 53.7049 32.5256 54.1316 31.7887C57.6066 25.7783 64.1485 23.0314 68.7146 25.6643L71.3124 21.1719C64.265 17.1085 54.5398 20.7082 49.634 29.1928Z" fill="#006EFF"/>
       <path fill-rule="evenodd" clip-rule="evenodd" d="M50.3468 54.4161C49.5038 54.4972 48.6464 54.5383 47.7976 54.5383C40.8488 54.5383 35.1951 50.2548 35.1951 44.9896H30C30 53.1153 37.9843 59.7254 47.7976 59.7254C48.8122 59.7254 49.8377 59.6761 50.8453 59.5789L50.3468 54.4161Z" fill="#7800FF"/>
       <path fill-rule="evenodd" clip-rule="evenodd" d="M75.1926 46.0498C74.6842 45.1716 74.1276 44.3084 73.5386 43.4841L69.3094 46.4962C69.8033 47.1868 70.2694 47.9105 70.6949 48.6451C72.4307 51.648 73.131 54.9802 72.6661 58.0282C72.2336 60.862 70.8306 63.0943 68.7145 64.3141L69.674 66.7253L71.3124 68.8065C74.8222 66.7826 77.1266 63.2327 77.8015 58.8097C78.4433 54.6016 77.5174 50.0704 75.1926 46.0498Z" fill="#0032D3"/>
@@ -1140,21 +1155,22 @@ footer {
           <stop offset="1" stop-color="#7800FF"/>
         </linearGradient>
       </defs>
-    </svg>
-  </a>
-  <ul class="menu">
-    <li><a href="#problem">Why</a></li>
-    <li><a href="#solution">Platform</a></li>
-    <li><a href="#features">Features</a></li>
-    <li><a href="#usecases">Solutions</a></li>
-    <li><a href="#trust">About</a></li>
-  </ul>
-  <div class="nav-actions">
-    <a href="#cta" class="cta">도입 문의</a>
-    <button class="menu-button" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-menu" data-menu-button>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </button>
+      </svg>
+    </a>
+    <ul class="menu">
+      <li><a href="#problem">Why</a></li>
+      <li><a href="#solution">Platform</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#usecases">Solutions</a></li>
+      <li><a href="#trust">About</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#cta" class="cta">도입 문의</a>
+      <button class="menu-button" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-menu" data-menu-button>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+    </div>
   </div>
   <div class="mobile-menu" id="mobile-menu" data-mobile-menu>
     <nav aria-label="모바일 메뉴">
@@ -1176,7 +1192,6 @@ footer {
     <source src="https://vod-homepage.pstatic.net/cdn-vod/naver-labs/main-banner/3_Platform%20%26%20OS_(11MB).mp4" type="video/mp4">
   </video>
   <div class="hero-content">
-    <div class="eyebrow reveal">NAVER Cloud Platform · Digital Twin</div>
     <h1 class="reveal delay-1">
       Multi-Robot<br>
       Multi-Facility<br>
