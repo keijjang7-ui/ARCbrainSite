@@ -602,9 +602,10 @@ section:not(.hero) { padding: 160px 40px; position: relative; }
   grid-template-columns: 1fr 1fr;
   gap: 80px;
   margin-bottom: 220px;
-  align-items: end;
+  align-items: start;
 }
 .features-head .section-title { margin-bottom: 0; }
+.features-head .section-lead { margin-top: 49px; }
 
 .feature-block {
   display: grid;
@@ -740,10 +741,11 @@ section:not(.hero) { padding: 160px 40px; position: relative; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 80px;
-  align-items: end;
+  align-items: start;
   margin-bottom: 80px;
 }
 .uc-head .section-title { margin: 0; }
+.uc-head .section-lead { margin-top: 49px; }
 
 .uc-grid {
   display: grid;
@@ -1069,6 +1071,8 @@ footer {
   #features { padding-bottom: 0; }
   .features-head,
   .uc-head { grid-template-columns: 1fr; gap: 32px; }
+  .features-head .section-lead,
+  .uc-head .section-lead { margin-top: 0; }
   .feature-block { grid-template-columns: 1fr; gap: 40px; margin-bottom: 100px; }
   .feature-block.reverse .feat-visual { order: 0; }
   .feature-block.reverse .feat-content { order: 0; }
