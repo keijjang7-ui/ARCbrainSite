@@ -407,18 +407,28 @@ section { padding: 140px 40px; position: relative; }
 .problem-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--line);
+  gap: 0;
+  background: #fff;
   border-radius: 24px;
   overflow: hidden;
   border: 1px solid var(--line);
 }
 .problem-card {
+  position: relative;
   background: #fff;
   padding: 44px 36px;
-  transition: background .25s;
 }
-.problem-card:hover { background: var(--indigo-soft); }
+.problem-card:nth-child(n+4)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--line);
+}
+.problem-card:nth-child(4)::before { left: 36px; }
+.problem-card:nth-child(6)::before { right: 36px; }
 .problem-card .num {
   font-size: 13px;
   font-weight: 700;
@@ -601,6 +611,7 @@ section { padding: 140px 40px; position: relative; }
   font-size: 14.5px;
   color: var(--ink-2);
 }
+.feat-content .feat-list li:first-child { border-top-color: transparent; }
 .feat-content .feat-list li:last-child { border-bottom: 1px solid var(--line); }
 .feat-content .feat-list li::before {
   content: "→";
@@ -1028,6 +1039,23 @@ footer {
   .problem-grid,
   .mini-feat-grid,
   .trust-stats { grid-template-columns: repeat(2, 1fr); }
+  .problem-card:nth-child(n+3)::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    height: 1px;
+    background: var(--line);
+  }
+  .problem-card:nth-child(3)::before,
+  .problem-card:nth-child(5)::before {
+    left: 36px;
+    right: 0;
+  }
+  .problem-card:nth-child(4)::before,
+  .problem-card:nth-child(6)::before {
+    left: 0;
+    right: 36px;
+  }
   .uc-grid { grid-template-columns: 1fr; }
   .trust-badge { grid-template-columns: 1fr; padding: 40px; }
   .foot-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
@@ -1055,11 +1083,21 @@ footer {
   .hero { min-height: 600px; }
   .hero h1 { letter-spacing: -1.2px; }
   .section-title { letter-spacing: -1.2px; }
+  .problem-lead-break { display: none; }
   .feat-content h3 { letter-spacing: -1px; }
   .problem-grid,
   .solution-pillars,
   .mini-feat-grid,
   .trust-stats { grid-template-columns: 1fr; }
+  .problem-card:nth-child(n+2)::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: var(--line);
+  }
   .problem-card { padding: 32px 24px; }
   .uc-card .uc-body { padding: 24px; }
   .trust-badge { padding: 28px; gap: 28px; }
@@ -1168,8 +1206,8 @@ footer {
       <div class="section-eyebrow reveal">The Reality</div>
       <h2 class="section-title reveal delay-1">로봇을 도입했지만,<br>운영은 더 복잡해졌습니다</h2>
       <p class="section-lead reveal delay-2">
-        제조사가 달라지면 운영은 나뉘고, 층이 늘어나면 이동은 복잡해지고,
-로봇 수가 많아질수록 관리의 부담은 커집니다.
+        제조사가 달라지면 운영은 나뉘고, 층이 늘어나면 이동은 복잡해지고,<br class="problem-lead-break">
+        로봇 수가 많아질수록 관리의 부담은 커집니다.
       </p>
     </div>
 
