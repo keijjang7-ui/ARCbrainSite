@@ -290,6 +290,7 @@ img { max-width: 100%; display: block; }
   line-height: 1.65;
   letter-spacing: -0.2px;
 }
+.hero-sub-break { display: inline; }
 .hero .cta-row {
   display: flex;
   gap: 12px;
@@ -401,6 +402,22 @@ section { padding: 140px 40px; position: relative; }
   line-height: 1.7;
   max-width: 640px;
   letter-spacing: -0.2px;
+}
+.section-lead,
+.problem-card p,
+.arch-block .desc,
+.pillar h4,
+.pillar p,
+.feat-content .feat-copy,
+.feat-content .feat-list li,
+.mini-feat-head .section-title,
+.mini-card h4,
+.mini-card p,
+.uc-card p,
+.trust-badge .desc,
+.cta-content p {
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* ---------- PROBLEM ---------- */
@@ -1097,6 +1114,7 @@ footer {
     padding-left: 0;
   }
   .hero h1 { letter-spacing: -1.2px; }
+  .hero-sub-break { display: none; }
   .section-title { letter-spacing: -1.2px; }
   .problem-lead-break { display: none; }
   .feat-content h3 { letter-spacing: -1px; }
@@ -1197,8 +1215,8 @@ footer {
       <span class="gradient">One Cloud</span>
     </h1>
     <p class="sub reveal delay-2">
-      제조사가 달라도, 층이 달라도, 로봇 수가 늘어나도<br>
-      여러 로봇과 시설을 하나의 클라우드에서 통합 운영합니다.
+      제조사가 달라도, 층이 달라도, 로봇 수가 늘어나도 여러 로봇과 시설을<br class="hero-sub-break">
+      하나의 클라우드에서 통합 운영합니다.
     </p>
     <div class="cta-row reveal delay-3">
       <a href="#cta" class="btn btn-primary">도입 문의하기 <span class="arrow">→</span></a>
