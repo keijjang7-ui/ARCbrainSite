@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARC brain | Multi-Robot, Multi-Facility, One Cloud.</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<style>
+:root {
+  --primary: #3461FF;
+  --primary-2: #5B6CFF;
+  --violet: #6029FF;
+  --violet-2: #7B47FF;
+  --primary-dark: #1633D6;
+  --indigo-bg: #EEF1FF;
+  --indigo-soft: #F5F7FF;
+  --accent-green: #10B981;
+  --accent-red: #EF4444;
+
+  --ink: #08090C;
+  --ink-2: #1A1C22;
+  --ink-3: #2A2D35;
+  --ink-soft: #4A4D55;
+  --muted: #8B8F98;
+  --muted-2: #B5B8BF;
+  --line: #E8EAEE;
+  --line-soft: #F1F2F5;
+  --bg: #FFFFFF;
+  --bg-2: #FAFBFC;
+  --bg-dark: #08090C;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Inter", "Noto Sans KR", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss03", "cv11";
+  overflow-x: hidden;
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
+img { max-width: 100%; display: block; }
+
+/* ---------- NAV ---------- */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 20px 40px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  transition: background .25s, backdrop-filter .25s, box-shadow .25s;
+}
+.nav.scrolled {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line);
+}
+.nav.open {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line);
+}
+.nav .logo {
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  width: 180px;
+  height: 54px;
+  flex: 0 0 auto;
+  justify-self: start;
+  transition: color .25s;
+}
+.nav.scrolled .logo { color: var(--ink); }
+.nav.open .logo { color: var(--ink); }
+.nav .logo-mark {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.nav .menu {
+  justify-self: center;
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+.nav .menu a {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color .2s;
+}
+.nav.scrolled .menu a { color: var(--ink-soft); }
+.nav .menu a:hover { color: var(--primary); }
+.nav-actions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nav .cta {
+  background: #fff;
+  color: var(--ink);
+  padding: 10px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all .2s;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.nav.scrolled .cta {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.nav.open .cta {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.nav .cta:hover { transform: translateY(-1px); }
+.menu-button {
+  display: none;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: color .2s, transform .2s;
+}
+.nav.scrolled .menu-button,
+.nav.open .menu-button {
+  color: var(--ink);
+}
+.menu-button:hover { transform: translateY(-1px); }
+.menu-button span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 999px;
+  transition: transform .18s ease;
+}
+.menu-button span:first-child {
+  transform: translate(-50%, calc(-50% - 4px));
+}
+.menu-button span:last-child {
+  transform: translate(-50%, calc(-50% + 4px));
+}
+.menu-button[aria-expanded="true"] span:first-child {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.menu-button[aria-expanded="true"] span:last-child {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: calc(100svh - 90px);
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 1px solid var(--line);
+  transition: opacity .18s ease, visibility .18s ease;
+}
+.nav.open .mobile-menu {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+.mobile-menu nav {
+  width: min(calc(100% - 56px), 520px);
+  margin: 34px auto;
+  display: grid;
+}
+.mobile-menu a {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+.mobile-menu a:hover {
+  color: var(--primary);
+}
+
+/* ---------- HERO ---------- */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 720px;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.hero video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8,9,12,0.55) 0%, rgba(8,9,12,0.35) 40%, rgba(8,9,12,0.7) 100%);
+  z-index: 1;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 32px;
+  max-width: 1100px;
+}
+.hero .eyebrow {
+  display: inline-block;
+  padding: 7px 14px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  backdrop-filter: blur(8px);
+}
+.hero h1 {
+  font-size: clamp(40px, 6.5vw, 88px);
+  line-height: 1.05;
+  letter-spacing: -2.5px;
+  font-weight: 700;
+  margin-bottom: 28px;
+}
+.hero h1 .gradient {
+  background: linear-gradient(135deg, #88A4FF 0%, #B89DFF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero .sub {
+  font-size: clamp(16px, 1.6vw, 19px);
+  font-weight: 400;
+  color: rgba(255,255,255,0.88);
+  max-width: 640px;
+  margin: 0 auto 44px;
+  line-height: 1.65;
+  letter-spacing: -0.2px;
+}
+.hero .cta-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 26px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all .2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  letter-spacing: -0.1px;
+}
+.btn-primary {
+  background: #fff;
+  color: var(--ink);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(255,255,255,0.2);
+}
+.btn-ghost {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255,255,255,0.3);
+}
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.5);
+}
+.btn-dark {
+  background: var(--ink);
+  color: #fff;
+}
+.btn-dark:hover { transform: translateY(-2px); background: var(--ink-2); }
+.btn-light {
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.btn-light:hover { border-color: var(--ink); }
+.btn .arrow { transition: transform .2s; }
+.btn:hover .arrow { transform: translateX(3px); }
+
+.hero-scroll {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  color: rgba(255,255,255,0.6);
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.hero-scroll .line {
+  width: 1px; height: 32px;
+  background: rgba(255,255,255,0.3);
+  animation: scrollLine 2s ease-in-out infinite;
+}
+@keyframes scrollLine {
+  0%, 100% { transform: scaleY(1); opacity: 0.3; }
+  50% { transform: scaleY(0.4) translateY(8px); opacity: 1; }
+}
+
+/* ---------- COMMON SECTION ---------- */
+section { padding: 140px 40px; position: relative; }
+.container { max-width: 1240px; margin: 0 auto; }
+.section-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1.1;
+  letter-spacing: -1.8px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 24px;
+  max-width: 880px;
+}
+.section-title .accent { color: var(--primary); }
+.section-title em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.section-lead {
+  font-size: 18px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  max-width: 640px;
+  letter-spacing: -0.2px;
+}
+
+/* ---------- PROBLEM ---------- */
+#problem { background: var(--bg-2); }
+.problem-head {
+  text-align: center;
+  margin-bottom: 80px;
+}
+.problem-head .section-title { margin: 0 auto 24px; }
+.problem-head .section-lead { margin: 0 auto; }
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.problem-card {
+  background: #fff;
+  padding: 44px 36px;
+  transition: background .25s;
+}
+.problem-card:hover { background: var(--indigo-soft); }
+.problem-card .num {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  margin-bottom: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.problem-card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 14px;
+  letter-spacing: -0.6px;
+  line-height: 1.3;
+}
+.problem-card p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+/* ---------- SOLUTION ---------- */
+#solution {
+  background: var(--bg-dark);
+  color: #fff;
+  overflow: hidden;
+}
+#solution .section-title { color: #fff; }
+#solution .section-lead { color: rgba(255,255,255,0.7); }
+#solution .section-eyebrow { color: var(--primary-2); }
+.solution-head {
+  text-align: center;
+  margin-bottom: 80px;
+}
+.solution-head .section-title { margin: 0 auto 24px; }
+.solution-head .section-lead { margin: 0 auto; }
+
+.solution-arch {
+  display: grid;
+  grid-template-columns: 1fr 60px 1.4fr 60px 1fr;
+  gap: 0;
+  align-items: center;
+  margin-bottom: 100px;
+}
+.arch-block {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 36px 28px;
+  text-align: center;
+  transition: all .25s;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.arch-block.center {
+  background: linear-gradient(135deg, rgba(52,97,255,0.2) 0%, rgba(96,41,255,0.2) 100%);
+  border: 1px solid rgba(91,108,255,0.4);
+  box-shadow: 0 0 80px rgba(91,108,255,0.2);
+}
+.arch-block .tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--primary-2);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.arch-block .name {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+.arch-block.center .name {
+  font-size: 28px;
+  background: linear-gradient(135deg, #88A4FF 0%, #B89DFF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.arch-block .desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.55;
+}
+.arch-arrow {
+  text-align: center;
+  color: var(--primary-2);
+  font-size: 20px;
+  font-weight: 300;
+}
+
+.solution-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.pillar {
+  padding: 36px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  transition: all .3s;
+}
+.pillar:hover {
+  transform: translateY(-4px);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(91,108,255,0.3);
+}
+.pillar .axis {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-2);
+  letter-spacing: 2px;
+  margin-bottom: 18px;
+}
+.pillar h4 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  margin-bottom: 12px;
+}
+.pillar p {
+  font-size: 14.5px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.65;
+}
+
+/* ---------- FEATURES ---------- */
+#features { padding: 160px 40px 120px; }
+.features-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-bottom: 180px;
+  align-items: end;
+}
+.features-head .section-title { margin-bottom: 0; }
+
+.feature-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  margin-bottom: 140px;
+}
+.feature-block:last-child { margin-bottom: 0; }
+.feature-block.reverse .feat-visual { order: 2; }
+.feature-block.reverse .feat-content { order: 1; }
+
+.feat-content h3 {
+  font-size: clamp(32px, 3.8vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--ink);
+}
+.feat-content .feat-copy {
+  font-size: 17px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  margin-bottom: 24px;
+  letter-spacing: -0.2px;
+}
+.feat-content .feat-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 24px;
+}
+.feat-content .feat-list li {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 14.5px;
+  color: var(--ink-2);
+}
+.feat-content .feat-list li:last-child { border-bottom: 1px solid var(--line); }
+.feat-content .feat-list li::before {
+  content: "→";
+  color: var(--primary);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.feat-visual {
+  background: var(--indigo-bg);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feat-visual.dark {
+  background: var(--bg-dark);
+}
+.feat-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.feat-visual.screen img {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* MINI FEATURES GRID */
+.mini-feat-section {
+  background: var(--bg-2);
+  margin: 0 -40px;
+  padding: 120px 40px;
+  margin-top: 80px;
+}
+.mini-feat-section .container { max-width: 1240px; }
+.mini-feat-head {
+  text-align: center;
+  margin-bottom: 60px;
+}
+.mini-feat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.mini-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 32px;
+  transition: all .25s;
+}
+.mini-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: 0 12px 40px rgba(52,97,255,0.12);
+}
+.mini-card .tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--indigo-bg);
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+}
+.mini-card h4 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+.mini-card p {
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+/* ---------- USE CASES ---------- */
+#usecases {
+  padding: 160px 40px;
+}
+.uc-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: end;
+  margin-bottom: 80px;
+}
+.uc-head .section-title { margin: 0; }
+
+.uc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+.uc-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  overflow: hidden;
+  transition: all .3s;
+  position: relative;
+}
+.uc-card:hover {
+  border-color: var(--ink);
+  transform: translateY(-4px);
+}
+.uc-card .uc-image {
+  aspect-ratio: 16/10;
+  background: var(--indigo-bg);
+  position: relative;
+  overflow: hidden;
+}
+.uc-card .uc-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .5s;
+}
+.uc-card:hover .uc-image img { transform: scale(1.03); }
+.uc-card .uc-body {
+  padding: 32px 36px;
+}
+.uc-card .uc-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 1.5px;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.uc-card h4 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.7px;
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+.uc-card p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+/* ---------- TRUST ---------- */
+#trust {
+  background: var(--bg-2);
+  padding: 140px 40px;
+}
+.trust-head {
+  text-align: center;
+  margin-bottom: 80px;
+}
+.trust-head .section-title { margin: 0 auto 24px; }
+.trust-head .section-lead { margin: 0 auto; }
+
+.trust-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 72px;
+}
+.stat {
+  background: #fff;
+  padding: 56px 32px;
+  text-align: center;
+}
+.stat .num {
+  font-size: clamp(42px, 5vw, 64px);
+  font-weight: 700;
+  letter-spacing: -2.5px;
+  line-height: 1;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.stat .label {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.trust-badge {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 56px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.trust-badge .title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  line-height: 1.3;
+  margin-bottom: 16px;
+}
+.trust-badge .desc {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+.trust-badge .meta {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.trust-logos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.trust-logo {
+  padding: 22px 16px;
+  background: var(--bg-2);
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-align: center;
+  letter-spacing: -0.2px;
+  border: 1px solid var(--line-soft);
+}
+.trust-logo .sub {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 500;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* ---------- CTA ---------- */
+#cta {
+  background: var(--bg-dark);
+  color: #fff;
+  padding: 160px 40px;
+  overflow: hidden;
+  position: relative;
+}
+#cta::before {
+  content: "";
+  position: absolute;
+  top: -50%; right: -20%;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(91,108,255,0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 0;
+}
+#cta::after {
+  content: "";
+  position: absolute;
+  bottom: -30%; left: -10%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(96,41,255,0.22) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 0;
+}
+.cta-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 880px;
+  margin: 0 auto;
+}
+.cta-content .section-eyebrow { color: var(--primary-2); }
+.cta-content h2 {
+  font-size: clamp(40px, 6vw, 76px);
+  line-height: 1.05;
+  letter-spacing: -2px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 28px;
+}
+.cta-content h2 em {
+  font-style: normal;
+  background: linear-gradient(135deg, #88A4FF 0%, #B89DFF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.cta-content p {
+  font-size: 18px;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 44px;
+  line-height: 1.65;
+  letter-spacing: -0.2px;
+}
+.cta-row-center {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- FOOTER ---------- */
+footer {
+  background: var(--bg-dark);
+  color: rgba(255,255,255,0.6);
+  padding: 80px 40px 40px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.foot-grid {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(4, 1fr);
+  gap: 48px;
+  max-width: 1240px;
+  margin: 0 auto 56px;
+}
+.foot-brand .footer-logo {
+  color: #fff;
+  width: 144px;
+  height: 43px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+.foot-brand .footer-logo-mark {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.foot-brand p {
+  font-size: 13px;
+  line-height: 1.65;
+  max-width: 280px;
+}
+.foot-col h5 {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  letter-spacing: 0.3px;
+}
+.foot-col ul { list-style: none; padding: 0; }
+.foot-col ul li { margin-bottom: 10px; }
+.foot-col ul li a {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  font-size: 13.5px;
+  transition: color .2s;
+}
+.foot-col ul li a:hover { color: var(--primary-2); }
+.foot-bottom {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* ---------- REVEAL ANIMATION ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1);
+  will-change: opacity, transform;
+}
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal.delay-1 { transition-delay: .08s; }
+.reveal.delay-2 { transition-delay: .16s; }
+.reveal.delay-3 { transition-delay: .24s; }
+.reveal.delay-4 { transition-delay: .32s; }
+.reveal.delay-5 { transition-delay: .4s; }
+.reveal.delay-6 { transition-delay: .48s; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1360px) {
+  .nav {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 18px 32px;
+  }
+  .nav .menu { display: none; }
+  .menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mobile-menu { display: block; }
+}
+
+@media (max-width: 1024px) {
+  section { padding: 100px 28px; }
+  #features { padding: 100px 28px 80px; }
+  .features-head,
+  .uc-head { grid-template-columns: 1fr; gap: 32px; }
+  .feature-block { grid-template-columns: 1fr; gap: 40px; margin-bottom: 100px; }
+  .feature-block.reverse .feat-visual { order: 0; }
+  .feature-block.reverse .feat-content { order: 0; }
+  .solution-arch {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .arch-arrow { transform: rotate(90deg); padding: 0; }
+  .solution-pillars,
+  .problem-grid,
+  .mini-feat-grid,
+  .trust-stats { grid-template-columns: repeat(2, 1fr); }
+  .uc-grid { grid-template-columns: 1fr; }
+  .trust-badge { grid-template-columns: 1fr; padding: 40px; }
+  .foot-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
+  .mini-feat-section { margin: 80px -28px 0; padding: 100px 28px; }
+}
+
+@media (max-width: 640px) {
+  .nav { padding: 16px 22px; }
+  .nav .logo { width: 168px; height: 51px; }
+  .nav .cta { display: none; }
+  .nav-actions { gap: 0; }
+  .mobile-menu {
+    height: calc(100svh - 83px);
+  }
+  .mobile-menu nav {
+    width: calc(100% - 44px);
+    margin: 28px auto;
+  }
+  .mobile-menu a {
+    min-height: 54px;
+    font-size: 22px;
+  }
+  section { padding: 80px 22px; }
+  #features { padding: 80px 22px 60px; }
+  .hero { min-height: 600px; }
+  .hero h1 { letter-spacing: -1.2px; }
+  .section-title { letter-spacing: -1.2px; }
+  .feat-content h3 { letter-spacing: -1px; }
+  .problem-grid,
+  .solution-pillars,
+  .mini-feat-grid,
+  .trust-stats { grid-template-columns: 1fr; }
+  .problem-card { padding: 32px 24px; }
+  .uc-card .uc-body { padding: 24px; }
+  .trust-badge { padding: 28px; gap: 28px; }
+  .mini-feat-section { margin: 60px -22px 0; padding: 80px 22px; }
+  .foot-grid { grid-template-columns: 1fr; }
+  .cta-content p { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================ -->
+<!-- NAV -->
+<!-- ============================ -->
+<nav class="nav" id="nav">
+  <a href="#hero" class="logo" aria-label="ARC brain">
+    <svg class="logo-mark" width="300" height="90" viewBox="30 0 300 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M49.634 29.1928C49.125 30.0716 48.6536 30.984 48.2327 31.9044L52.9588 34.0586C53.3107 33.2886 53.7049 32.5256 54.1316 31.7887C57.6066 25.7783 64.1485 23.0314 68.7146 25.6643L71.3124 21.1719C64.265 17.1085 54.5398 20.7082 49.634 29.1928Z" fill="#006EFF"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M50.3468 54.4161C49.5038 54.4972 48.6464 54.5383 47.7976 54.5383C40.8488 54.5383 35.1951 50.2548 35.1951 44.9896H30C30 53.1153 37.9843 59.7254 47.7976 59.7254C48.8122 59.7254 49.8377 59.6761 50.8453 59.5789L50.3468 54.4161Z" fill="#7800FF"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M75.1926 46.0498C74.6842 45.1716 74.1276 44.3084 73.5386 43.4841L69.3094 46.4962C69.8033 47.1868 70.2694 47.9105 70.6949 48.6451C72.4307 51.648 73.131 54.9802 72.6661 58.0282C72.2336 60.862 70.8306 63.0943 68.7145 64.3141L69.674 66.7253L71.3124 68.8065C74.8222 66.7826 77.1266 63.2327 77.8015 58.8097C78.4433 54.6016 77.5174 50.0704 75.1926 46.0498Z" fill="#0032D3"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M50.8461 59.5792L50.3458 54.4164C51.7917 54.2763 53.2375 54.0152 54.6434 53.6401L55.985 58.6512C54.3048 59.0998 52.5755 59.4119 50.8461 59.5792Z" fill="#7800FF"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M68.7146 64.3143C66.5991 65.5335 63.9606 65.6307 61.2863 64.5881C58.409 63.465 55.868 61.1933 54.1311 58.1882C53.7044 57.4518 53.3101 56.6894 52.9588 55.9206L50.3465 56.7351L48.2327 58.0747C48.653 58.9935 49.1244 59.9053 49.6328 60.784C51.957 64.8029 55.4239 67.87 59.3957 69.4198C61.2457 70.1417 63.1067 70.5 64.9114 70.5C67.1794 70.5 69.3575 69.9333 71.3118 68.8067L68.7146 64.3143Z" fill="#0032D3"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M46.4673 36.8135C45.7531 39.4806 45.3913 42.2316 45.3913 44.9895C45.3913 47.7475 45.7531 50.4985 46.4673 53.1644C46.916 54.841 47.5097 56.492 48.2332 58.0742L50.5963 56.9974L52.9593 55.9212C52.3558 54.6007 51.8601 53.2229 51.4856 51.8254C50.889 49.5954 50.5864 47.2959 50.5864 44.9895C50.5864 42.6837 50.889 40.3831 51.4856 38.1531C51.8601 36.7568 52.3558 35.3795 52.9593 34.0578L48.2332 31.9054C47.5097 33.4876 46.9154 35.1393 46.4673 36.8135Z" fill="url(#paint0_linear_2354_47590)"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M50.8467 30.3999C49.8402 30.3026 48.8147 30.2534 47.7978 30.2534C37.9839 30.2534 30.0002 36.864 30.0002 44.9897L32.576 45.3064L35.1947 44.9897C35.1947 39.7239 40.8484 35.4405 47.7978 35.4405C48.6477 35.4405 49.5051 35.4816 50.3452 35.5632L51.1035 33.0588L50.8467 30.3999Z" fill="#7800FF"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M50.347 35.563C51.7889 35.7025 53.2348 35.9631 54.6435 36.3388C56.864 36.9322 59.0084 37.8202 61.0155 38.9798C63.0301 40.144 64.8737 41.5554 66.4959 43.174C67.5162 44.1935 68.4629 45.3114 69.3094 46.4965L73.5386 43.4832C72.5264 42.0666 71.3924 40.7281 70.1685 39.506C68.2276 37.5678 66.0228 35.8803 63.6168 34.4891C61.2144 33.102 58.6467 32.038 55.9845 31.3265C54.3003 30.8784 52.5709 30.5664 50.8456 30.3997L50.347 35.563Z" fill="url(#paint1_linear_2354_47590)"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M66.4957 46.8045C64.8748 48.4225 63.0312 49.8339 61.0154 50.9987C59.0083 52.1583 56.8638 53.0475 54.644 53.6397L54.9472 56.1453L55.9849 58.6508C58.6465 57.9405 61.2148 56.877 63.6167 55.4894C66.0244 54.0977 68.228 52.4101 70.169 50.4725C72.1129 48.5308 73.8034 46.3315 75.1925 43.9336L70.6954 41.3354C69.533 43.3419 68.1196 45.1817 66.4957 46.8045Z" fill="url(#paint2_linear_2354_47590)"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M71.3122 21.1719L69.4436 23.0823L68.7149 25.6643C73.281 28.2972 74.1692 35.3282 70.6947 41.3373L72.6108 43.1181L75.1936 43.9315C80.1005 35.4445 78.359 25.2347 71.3122 21.1719Z" fill="#006EFF"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M258 58.036V46.91C258 42.5595 255.4 39.4216 250.93 39.4216C247.708 39.4216 245.731 41.0975 244.554 43.2374V39.8499H242.856V58.036H244.554V47.5166C244.554 43.7364 247.223 41.0268 250.688 41.0268C254.257 41.0268 256.301 43.4863 256.301 47.2314V58.036H258ZM234.262 34.3939H236.376V32.0045H234.262V34.3939ZM226.468 58.036H228.131V46.6962C228.131 44.4493 227.507 42.774 226.329 41.5615C225.047 40.2414 223.141 39.5648 220.751 39.5648C218.324 39.5648 216.419 40.2064 214.478 41.1332L215.102 42.6671C216.73 41.811 218.498 41.2044 220.646 41.2044C224.285 41.2044 226.468 43.0948 226.468 46.768V47.5522C224.769 47.0882 223.072 46.768 220.611 46.768C216.036 46.768 212.883 48.9073 212.883 52.6869V52.7582C212.883 56.5383 216.419 58.4638 219.71 58.4638C223.072 58.4638 225.255 56.7522 226.468 55.0044V58.036ZM226.503 51.2249C226.503 54.541 223.419 56.8235 219.815 56.8235C217.111 56.8235 214.686 55.2902 214.686 52.6512V52.58C214.686 50.048 216.765 48.3364 220.508 48.3364C223.037 48.3364 225.013 48.7648 226.503 49.1569V51.2249ZM210.702 41.4902H210.875V39.5648C207.375 39.4216 204.43 41.7754 203.043 45.0208V39.8499H201.345V58.036H203.043V50.5832C203.043 44.6638 206.613 41.4902 210.702 41.4902ZM196.046 48.943V48.8711C196.046 42.9522 191.715 39.4216 187.451 39.4216C183.952 39.4216 181.699 41.5258 180.174 43.9147V32.0051H178.477V58.036H180.174V54.1133C181.63 56.3958 183.917 58.4638 187.451 58.4638C191.715 58.4638 196.046 54.8618 196.046 48.943ZM194.209 49.0137C194.209 53.8994 191.125 56.7878 187.279 56.7878C183.605 56.7878 180.071 53.6499 180.071 48.9786V48.9073C180.071 44.2717 183.605 41.0975 187.279 41.0975C190.987 41.0975 194.209 44.1648 194.209 48.943V49.0137ZM165.86 40.0723L170.198 37.3391C168.119 33.7136 164.035 31.5 159.355 31.5C151.547 31.5 146.072 37.1711 146.072 44.9997C146.072 52.8283 151.547 58.5 159.355 58.5C163.998 58.5 167.758 56.3806 170.035 52.9962L165.914 49.9459C164.397 52.2332 162.138 53.517 159.319 53.517C154.856 53.517 151.332 50.2256 151.332 44.9997C151.332 39.9424 154.747 36.4836 159.319 36.4836C162.157 36.4836 164.415 37.8224 165.86 40.0723ZM141.285 58.0161L137.076 46.8895C139.837 45.6534 141.285 43.2374 141.285 39.9055C141.285 34.9225 138.05 31.9839 132.015 31.9839H121.1V58.0161H126.359V47.8271H132.046L135.9 58.0161H141.285ZM136.099 39.9055C136.099 42.0816 134.617 43.0483 131.924 43.0483H126.359V36.7627H131.924C134.617 36.7627 136.099 37.7294 136.099 39.9055ZM110.456 58.0173H115.841L105.992 31.9839H99.8485L90 58.0173H95.2589L97.4636 51.954H108.252L110.456 58.0173ZM106.518 47.1758H99.1979L102.866 37.1162L106.518 47.1758ZM234.47 58.036H236.169V39.8499H234.47V58.036Z" fill="currentColor"/>
+      <defs>
+        <linearGradient id="paint0_linear_2354_47590" x1="46.9073" y1="32.5246" x2="46.9073" y2="57.1043" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#006EFF"/>
+          <stop offset="1" stop-color="#0032D3"/>
+        </linearGradient>
+        <linearGradient id="paint1_linear_2354_47590" x1="41.7464" y1="40.3577" x2="56.7143" y2="57.7588" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#7800FF"/>
+          <stop offset="1" stop-color="#0032D3"/>
+        </linearGradient>
+        <linearGradient id="paint2_linear_2354_47590" x1="64.601" y1="35.6288" x2="49.452" y2="51.547" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#006EFF"/>
+          <stop offset="1" stop-color="#7800FF"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </a>
+  <ul class="menu">
+    <li><a href="#problem">Why</a></li>
+    <li><a href="#solution">Platform</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#usecases">Solutions</a></li>
+    <li><a href="#trust">About</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="#cta" class="cta">도입 문의</a>
+    <button class="menu-button" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-menu" data-menu-button>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu" data-mobile-menu>
+    <nav aria-label="모바일 메뉴">
+      <a href="#problem">Why</a>
+      <a href="#solution">Platform</a>
+      <a href="#features">Features</a>
+      <a href="#usecases">Solutions</a>
+      <a href="#trust">About</a>
+      <a href="#cta">도입 문의</a>
+    </nav>
+  </div>
+</nav>
+
+<!-- ============================ -->
+<!-- HERO -->
+<!-- ============================ -->
+<section class="hero" id="hero">
+  <video autoplay muted loop playsinline preload="auto">
+    <source src="https://vod-homepage.pstatic.net/cdn-vod/naver-labs/main-banner/3_Platform%20%26%20OS_(11MB).mp4" type="video/mp4">
+  </video>
+  <div class="hero-content">
+    <div class="eyebrow reveal">NAVER Cloud Platform · Digital Twin</div>
+    <h1 class="reveal delay-1">
+      Multi-Robot<br>
+      Multi-Facility<br>
+      <span class="gradient">One Cloud</span>
+    </h1>
+    <p class="sub reveal delay-2">
+      제조사가 달라도, 층이 달라도, 로봇 수가 늘어나도<br>
+      여러 로봇과 시설을 하나의 클라우드에서 통합 운영합니다.
+    </p>
+    <div class="cta-row reveal delay-3">
+      <a href="#cta" class="btn btn-primary">도입 문의하기 <span class="arrow">→</span></a>
+      <a href="#solution" class="btn btn-ghost">플랫폼 살펴보기</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>SCROLL</span>
+    <span class="line"></span>
+  </div>
+</section>
+
+<!-- ============================ -->
+<!-- PROBLEM -->
+<!-- ============================ -->
+<section id="problem">
+  <div class="container">
+    <div class="problem-head">
+      <div class="section-eyebrow reveal">The Reality</div>
+      <h2 class="section-title reveal delay-1">로봇을 도입했지만,<br>운영은 더 복잡해졌습니다</h2>
+      <p class="section-lead reveal delay-2">
+        제조사가 달라지면 운영은 나뉘고, 층이 늘어나면 이동은 복잡해지고,
+로봇 수가 많아질수록 관리의 부담은 커집니다.
+      </p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-card reveal">
+        <div class="num">01</div>
+        <h3>제조사마다<br>다른 콘솔</h3>
+        <p>로봇 제조사가 달라지면 운영 도구도 달라집니다.
+새로운 로봇을 도입할 때마다 추가 교육과 운영 체계 정비가 필요합니다.</p>
+      </div>
+      <div class="problem-card reveal delay-1">
+        <div class="num">02</div>
+        <h3>층간 이동이 어려운<br>로봇</h3>
+        <p>층이 바뀌면 사람이 따라붙어야 합니다. 층간 이동이 자동화되지 않으면
+운영 효율 역시 제한됩니다.</p>
+      </div>
+      <div class="problem-card reveal delay-2">
+        <div class="num">03</div>
+        <h3>로봇 수가 늘수록<br>운영은 복잡해집니다</h3>
+        <p>두세 대만 동시에 움직여도 정체가 시작됩니다. 충돌과 대기 시간 관리가 운영팀의 부담으로 이어집니다.</p>
+      </div>
+      <div class="problem-card reveal delay-3">
+        <div class="num">04</div>
+        <h3>이상 징후를<br>늦게 발견합니다</h3>
+        <p>배터리·통신·리소스 이상을 사고가 난 뒤에야 알게 됩니다. 문제가 발생한 뒤에 대응하는 경우가 많습니다.</p>
+      </div>
+      <div class="problem-card reveal delay-4">
+        <div class="num">05</div>
+        <h3>직접 개발할수록<br>유지보수 부담이 커집니다</h3>
+        <p>EV 호출, 충돌 회피, 재경로 알고리즘을 직접 구현하느라 핵심 서비스 개발에 투입할 시간이 줄어듭니다.</p>
+      </div>
+      <div class="problem-card reveal delay-5">
+        <div class="num">06</div>
+        <h3>데이터 없이<br>운영합니다</h3>
+        <p>가동률, 문제 분포, 개선 효과를 숫자로 보지 못합니다. 결정은 항상 추측 위에 있습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ -->
+<!-- SOLUTION -->
+<!-- ============================ -->
+<section id="solution">
+  <div class="container">
+    <div class="solution-head">
+      <div class="section-eyebrow reveal">The Platform</div>
+      <h2 class="section-title reveal delay-1">하나의 플랫폼으로<br>로봇과 시설을 <em>연결합니다</em></h2>
+      <p class="section-lead reveal delay-2">
+        표준 인터페이스 · 디지털 트윈 · 오케스트레이션,<br>
+        세 가지 핵심 기술로 분산된 로봇 운영을 통합합니다.
+      </p>
+    </div>
+
+    <div class="solution-arch reveal delay-3">
+      <div class="arch-block">
+        <div class="tag">Robots</div>
+        <div class="name">멀티 제조사 로봇</div>
+        <div class="desc">카페·택배·창고·서비스 로봇<br>네이버 / 서드파티</div>
+      </div>
+      <div class="arch-arrow">⇄</div>
+      <div class="arch-block center">
+        <div class="tag">CORE</div>
+        <div class="name">ARC brain</div>
+        <div class="desc">Control · Monitoring<br>Management · APIs</div>
+      </div>
+      <div class="arch-arrow">⇄</div>
+      <div class="arch-block">
+        <div class="tag">Facilities</div>
+        <div class="name">빌딩 시설</div>
+        <div class="desc">엘리베이터 · 자동문<br>게이트 · 도킹스테이션</div>
+      </div>
+    </div>
+
+    <div class="solution-pillars">
+      <div class="pillar reveal">
+        <div class="axis">AXIS 01</div>
+        <h4>표준 인터페이스</h4>
+        <p>MQTT · Web app SDK · 표준 API. 어떤 제조사의 로봇이든 같은 방식으로 통합됩니다. 잠금(lock-in)이 없습니다.</p>
+      </div>
+      <div class="pillar reveal delay-1">
+        <div class="axis">AXIS 02</div>
+        <h4>디지털 트윈</h4>
+        <p>현실의 층, 동선, 시설이 그대로 클라우드 위에 비칩니다. 보이지 않으면 통제할 수 없습니다.</p>
+      </div>
+      <div class="pillar reveal delay-2">
+        <div class="axis">AXIS 03</div>
+        <h4>오케스트레이션</h4>
+        <p>엘리베이터 호출 · 트래픽 제어 · 충돌 회피 · 재경로. 복잡한 결정은 플랫폼이 흡수합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ -->
+<!-- FEATURES — large blocks -->
+<!-- ============================ -->
+<section id="features">
+  <div class="container">
+    <div class="features-head">
+      <div>
+        <div class="section-eyebrow reveal">Core Features</div>
+        <h2 class="section-title reveal delay-1">기능보다 중요한 것은<br>운영 결과입니다</h2>
+      </div>
+      <p class="section-lead reveal delay-2">
+        ARC brain의 모든 기능은 운영자의 다음 하루에 무엇이 달라지는지로 설명됩니다. 모든 기능은 운영 효율과 안정성을 높이기 위해 설계되었습니다.
+      </p>
+    </div>
+
+    <!-- F01 — Multi-Robot Control -->
+    <div class="feature-block">
+      <div class="feat-content reveal">
+        <h3>제조사가 달라도,<br>콘솔은 하나.</h3>
+        <p class="feat-copy">
+          카페 배달 로봇, 택배 로봇, 창고 로봇이 같은 화면 위에서 같은 방식으로 움직입니다.
+          새로운 로봇을 들여도 운영 방식은 바뀌지 않습니다.
+        </p>
+        <ul class="feat-list">
+          <li>표준화된 인터페이스로 신규·서드파티 로봇 통합</li>
+          <li>로봇별 모델 등록, 운영 이력, 이상 리포트 일원화</li>
+          <li>운영 체계를 표준화할 수 있습니다.</li>
+        </ul>
+      </div>
+      <div class="feat-visual dark reveal delay-1">
+        <img src="https://www.naverlabs.com/img/nrobot/rookie/scene6.png" alt="ARC brain orchestrates multi-robot operations">
+      </div>
+    </div>
+
+    <!-- F02 — Real-Time Monitoring -->
+    <div class="feature-block reverse">
+      <div class="feat-content reveal">
+        <h3>보이지 않으면,<br>통제할 수 없습니다.</h3>
+        <p class="feat-copy">
+          층별 지도 위에, 모든 로봇의 위치와 상태가 한눈에 들어옵니다. 위치·주행 모드·배터리·CPU·통신 상태·전면 카메라 영상까지. 모든 정보를 하나의 화면에서 실시간으로 확인할 수 있습니다.
+        </p>
+        <ul class="feat-list">
+          <li>층별 지도 기반 디지털 트윈 관제실</li>
+          <li>상태 색상·아이콘으로 우선순위가 자동 정렬</li>
+          <li>의심 구간은 로봇 카메라로 즉시 확인</li>
+        </ul>
+      </div>
+      <div class="feat-visual screen reveal delay-1">
+        <img src="https://www.naverlabs.com/img/nrobot/m2/img_xr01.png" alt="ARC brain admin console — Robot monitoring view">
+      </div>
+    </div>
+
+    <!-- F03 — Facility Integration -->
+    <div class="feature-block">
+      <div class="feat-content reveal">
+        <h3>시설이 로봇 운영과<br>연동됩니다.</h3>
+        <p class="feat-copy">
+          엘리베이터·자동문·게이트가 로봇의 호출에 응답합니다.
+          사람이 동행하지 않아도, 로봇은 건물 전체를 다닙니다.
+        </p>
+        <ul class="feat-list">
+          <li>단독호기 · 그룹호기 · 화물용 엘리베이터 연동</li>
+          <li>스피드게이트 · 로보포트 전실 자동문 지원</li>
+          <li>로봇 모드 활성화로 사람·로봇 동선 분리</li>
+        </ul>
+      </div>
+      <div class="feat-visual screen reveal delay-1">
+        <img src="https://www.naverlabs.com/img/nrobot/rookie/img_infra03_v2.png" alt="ARC brain facility management — Elevator, Gate, Docking">
+      </div>
+    </div>
+
+    <!-- F04 — Traffic Control -->
+    <div class="feature-block reverse">
+      <div class="feat-content reveal">
+        <h3>대수가 늘어도,<br>동선은 흐릅니다</h3>
+        <p class="feat-copy">
+          여러 로봇이 같은 공간을 지날 때, 누가 먼저 갈지 플랫폼이 정합니다.
+          충돌도 정체도 더 이상 사람의 일이 아닙니다.
+        </p>
+        <ul class="feat-list">
+          <li>작업 우선순위와 시설 점유를 함께 본 동선 조율</li>
+          <li>엘리베이터·게이트 대기열 자동 관리</li>
+          <li>로봇 수가 늘어나도 운영 복잡도를 최소화합니다.</li>
+        </ul>
+      </div>
+      <div class="feat-visual reveal delay-1">
+        <img src="https://www.naverlabs.com/img/arc/img_en_pc_diagram_arc.png" alt="ARC brain UI components — real-time data orchestration">
+      </div>
+    </div>
+  </div>
+
+  <!-- MINI FEATURES (6 cards) -->
+  <div class="mini-feat-section">
+    <div class="container">
+      <div class="mini-feat-head">
+        <div class="section-eyebrow reveal">More on the Platform</div>
+        <h2 class="section-title reveal delay-1" style="margin: 0 auto;">하나의 운영, 더 많은 결과.</h2>
+      </div>
+      <div class="mini-feat-grid">
+        <div class="mini-card reveal">
+          <div class="tag">REMOTE CONTROL</div>
+          <h4>현장 방문 없이 원격으로 제어합니다.</h4>
+          <p>문제가 생긴 로봇은 콘솔에서 직접 움직입니다. 방향·좌표·적재함까지 — 사람이 옆에 있을 때 할 수 있는 일을 화면에서.</p>
+        </div>
+        <div class="mini-card reveal delay-1">
+          <div class="tag">MAP EDITOR</div>
+          <h4>지도 변경 사항을 운영에 즉시 반영합니다.</h4>
+          <p>매장 구조가 바뀌었다면 지도를 다시 그리세요. Queue · Waiting · Layover · Virtual Wall — 편집은 즉시 반영됩니다.</p>
+        </div>
+        <div class="mini-card reveal delay-2">
+          <div class="tag">NOTIFICATIONS</div>
+          <h4>이상 징후를 사전에 감지합니다.</h4>
+          <p>배터리가 부족해지기 전에, 통신이 끊기기 전에 알려드립니다. FATAL · WARN · NOTI 세 단계로 자동 정렬.</p>
+        </div>
+        <div class="mini-card reveal delay-3">
+          <div class="tag">ANALYTICS</div>
+          <h4>데이터 기반으로 운영을 개선합니다.</h4>
+          <p>가동률·이동 거리·문제 분포가 매일 누적됩니다. 다음 분기의 결정은 직감이 아니라 통계 그래프 위에서.</p>
+        </div>
+        <div class="mini-card reveal delay-4">
+          <div class="tag">DEVELOPER API</div>
+          <h4>목적지만 전달하면 나머지는 플랫폼이 처리합니다.</h4>
+          <p>목적지만 던지세요. 엘리베이터 호출도, 충돌 회피도, 재경로도. MQTT · Web app SDK · REST API.</p>
+        </div>
+        <div class="mini-card reveal delay-5">
+          <div class="tag">AUTO-CHARGING</div>
+          <h4>충전 관리까지 자동화합니다.</h4>
+          <p>로봇은 스스로 도킹스테이션을 찾아갑니다. 야간·주말의 24시간 무인 가동이 현실이 됩니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ -->
+<!-- USE CASES -->
+<!-- ============================ -->
+<section id="usecases">
+  <div class="container">
+    <div class="uc-head">
+      <div>
+        <div class="section-eyebrow reveal">Solutions by Industry</div>
+        <h2 class="section-title reveal delay-1">산업별 운영 환경에 맞춘<br>로봇 플랫폼</h2>
+      </div>
+      <p class="section-lead reveal delay-2">
+        ARC brain은 산업을 가리지 않습니다.
+        실내외의 어떤 건물·어떤 동선·어떤 로봇 조합이든 같은 인터페이스 위에서 운영됩니다.
+      </p>
+    </div>
+
+    <div class="uc-grid">
+      <div class="uc-card reveal">
+        <div class="uc-image">
+          <img src="https://www.naverlabs.com/img/nrobot/rookie/img_instead04_v2.png" alt="Cafe and food delivery robots">
+        </div>
+        <div class="uc-body">
+          <div class="uc-tag">FOOD &amp; CAFE</div>
+          <h4>점심 시간의 오피스,<br>다섯 종류의 로봇이 멈추지 않습니다.</h4>
+          <p>커버형 적재함의 카페 배달, 서랍형 도시락 배달 — 다양한 모델을 같은 콘솔에서 통합 운영합니다.</p>
+        </div>
+      </div>
+
+      <div class="uc-card reveal delay-1">
+        <div class="uc-image">
+          <img src="https://www.naverlabs.com/img/nrobot/rookie/img_infra01_v2.png" alt="Parcel and lunch delivery robots in office buildings">
+        </div>
+        <div class="uc-body">
+          <div class="uc-tag">PARCEL DELIVERY</div>
+          <h4>층이 늘어나도,<br>배송은 늦지 않습니다.</h4>
+          <p>대형 사옥과 복합 시설에서 층별 택배·문서 운반. 엘리베이터 그룹 호출과 로봇 모드 독점으로 안정성 확보.</p>
+        </div>
+      </div>
+
+      <div class="uc-card reveal delay-2">
+        <div class="uc-image">
+          <img src="https://corp-homepage-phinf.pstatic.net/MjAyNjA0MDhfMTAx/MDAxNzc1NjQwNTQ5Njc2.nw8sduEi69FqiZNYcVPjQa5W7nid77Gpc-aXeNbcTzIg.L4F15p8CmCoruMhkRf23dkP_nWV5lExwn3ijgZGQ-fAg.PNG/12_03.png" alt="Warehouse and logistics robots">
+        </div>
+        <div class="uc-body">
+          <div class="uc-tag">WAREHOUSE</div>
+          <h4>새벽 두 시의 물류 센터,<br>사람 없이 흐르는 동선.</h4>
+          <p>대규모 창고 내 멀티 로봇 동시 운영. 트래픽 제어와 도킹스테이션 관리로 24시간 가동률을 높입니다.</p>
+        </div>
+      </div>
+
+      <div class="uc-card reveal delay-3">
+        <div class="uc-image">
+          <img src="https://corp-homepage-phinf.pstatic.net/MjAyNjA0MTBfMTUw/MDAxNzc1Nzk1ODMyNDA2.dmmcxquaTADoHzdpCVGhIRf-1oWJlgSs9IPc4AGC-3Eg.VnSwL0JaMIacyDEzXpoODtRYY66sqhfQNpjHzZxShEMg.JPEG/47_06.jpg" alt="Office and hotel service robots">
+        </div>
+        <div class="uc-body">
+          <div class="uc-tag">OFFICE &amp; HOTEL</div>
+          <h4>보안과 자동화가,<br>같은 공간에 양립합니다.</h4>
+          <p>스피드게이트 · 로보포트 전실 자동문 연동으로 보안 동선과 로봇 운영을 동시에 유지합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ -->
+<!-- TRUST -->
+<!-- ============================ -->
+<section id="trust">
+  <div class="container">
+    <div class="trust-head">
+      <div class="section-eyebrow reveal">Why Trust Us</div>
+      <h2 class="section-title reveal delay-1">엔터프라이즈 환경에 필요한<br>안정성과 보안을 제공합니다</h2>
+      <p class="section-lead reveal delay-2">
+        ARC brain은 네이버 클라우드 플랫폼의 VPC 환경에서 동작합니다.
+        기업이 요구하는 격리 · 보안 · 컴플라이언스 위에서, 로봇의 일상을 지킵니다.
+      </p>
+    </div>
+
+    <div class="trust-stats">
+      <div class="stat reveal">
+        <div class="num">10+</div>
+        <div class="label">통합 가능한<br>로봇 제조사 · 시설</div>
+      </div>
+      <div class="stat reveal delay-1">
+        <div class="num">3</div>
+        <div class="label">지원 언어<br>한국어 · 영어 · 일본어</div>
+      </div>
+      <div class="stat reveal delay-2">
+        <div class="num">24h</div>
+        <div class="label">무인 가동<br>오토 도킹 · 사전 알림</div>
+      </div>
+      <div class="stat reveal delay-3">
+        <div class="num">VPC</div>
+        <div class="label">기업용 보안 격리<br>NAVER Cloud 인프라</div>
+      </div>
+    </div>
+
+    <div class="trust-badge reveal">
+      <div>
+        <div class="title">Powered by<br>NAVER Cloud Platform.</div>
+        <p class="desc">
+          ARC brain은 네이버 클라우드 플랫폼의 디지털 트윈 서비스로 제공됩니다.
+          NCP의 검증된 인프라 · 보안 · 운영 인증 위에서 작동하며, ARC eye 측위 · Sub Account 권한 관리 · Resource Manager와 자연스럽게 연결됩니다.
+        </p>
+        <div class="meta">JPN-4 REGION · VPC ENVIRONMENT</div>
+      </div>
+      <div class="trust-logos">
+        <div class="trust-logo">NCP<span class="sub">CLOUD</span></div>
+        <div class="trust-logo">ARC eye<span class="sub">LOCALIZATION</span></div>
+        <div class="trust-logo">Sub Account<span class="sub">IAM</span></div>
+        <div class="trust-logo">MQTT<span class="sub">PROTOCOL</span></div>
+        <div class="trust-logo">Web SDK<span class="sub">INTEGRATION</span></div>
+        <div class="trust-logo">REST API<span class="sub">CONTROL</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ -->
+<!-- CTA -->
+<!-- ============================ -->
+<section id="cta">
+  <div class="cta-content">
+    <div class="section-eyebrow reveal">Let's Start</div>
+    <h2 class="reveal delay-1">
+      다음 한 걸음을,<br>
+      <em>함께 설계하겠습니다</em>
+    </h2>
+    <p class="reveal delay-2">
+      현장 환경과 운영 목표를 알려주시면, 가장 적합한 도입 시나리오를 제안드립니다.<br>
+      ARC brain은 그 시나리오의 다음 페이지입니다.
+    </p>
+    <div class="cta-row-center reveal delay-3">
+      <a href="#" class="btn btn-primary">도입 문의하기 <span class="arrow">→</span></a>
+      <a href="#" class="btn btn-ghost">API 문서 보기</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ -->
+<!-- FOOTER -->
+<!-- ============================ -->
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <a href="#hero" class="footer-logo" aria-label="ARC brain">
+        <svg class="footer-logo-mark" width="300" height="90" viewBox="30 0 300 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M49.634 29.1928C49.125 30.0716 48.6536 30.984 48.2327 31.9044L52.9588 34.0586C53.3107 33.2886 53.7049 32.5256 54.1316 31.7887C57.6066 25.7783 64.1485 23.0314 68.7146 25.6643L71.3124 21.1719C64.265 17.1085 54.5398 20.7082 49.634 29.1928Z" fill="#006EFF"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M50.3468 54.4161C49.5038 54.4972 48.6464 54.5383 47.7976 54.5383C40.8488 54.5383 35.1951 50.2548 35.1951 44.9896H30C30 53.1153 37.9843 59.7254 47.7976 59.7254C48.8122 59.7254 49.8377 59.6761 50.8453 59.5789L50.3468 54.4161Z" fill="#7800FF"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M75.1926 46.0498C74.6842 45.1716 74.1276 44.3084 73.5386 43.4841L69.3094 46.4962C69.8033 47.1868 70.2694 47.9105 70.6949 48.6451C72.4307 51.648 73.131 54.9802 72.6661 58.0282C72.2336 60.862 70.8306 63.0943 68.7145 64.3141L69.674 66.7253L71.3124 68.8065C74.8222 66.7826 77.1266 63.2327 77.8015 58.8097C78.4433 54.6016 77.5174 50.0704 75.1926 46.0498Z" fill="#0032D3"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M50.8461 59.5792L50.3458 54.4164C51.7917 54.2763 53.2375 54.0152 54.6434 53.6401L55.985 58.6512C54.3048 59.0998 52.5755 59.4119 50.8461 59.5792Z" fill="#7800FF"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M68.7146 64.3143C66.5991 65.5335 63.9606 65.6307 61.2863 64.5881C58.409 63.465 55.868 61.1933 54.1311 58.1882C53.7044 57.4518 53.3101 56.6894 52.9588 55.9206L50.3465 56.7351L48.2327 58.0747C48.653 58.9935 49.1244 59.9053 49.6328 60.784C51.957 64.8029 55.4239 67.87 59.3957 69.4198C61.2457 70.1417 63.1067 70.5 64.9114 70.5C67.1794 70.5 69.3575 69.9333 71.3118 68.8067L68.7146 64.3143Z" fill="#0032D3"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M46.4673 36.8135C45.7531 39.4806 45.3913 42.2316 45.3913 44.9895C45.3913 47.7475 45.7531 50.4985 46.4673 53.1644C46.916 54.841 47.5097 56.492 48.2332 58.0742L50.5963 56.9974L52.9593 55.9212C52.3558 54.6007 51.8601 53.2229 51.4856 51.8254C50.889 49.5954 50.5864 47.2959 50.5864 44.9895C50.5864 42.6837 50.889 40.3831 51.4856 38.1531C51.8601 36.7568 52.3558 35.3795 52.9593 34.0578L48.2332 31.9054C47.5097 33.4876 46.9154 35.1393 46.4673 36.8135Z" fill="url(#paint0_footer_logo)"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M50.8467 30.3999C49.8402 30.3026 48.8147 30.2534 47.7978 30.2534C37.9839 30.2534 30.0002 36.864 30.0002 44.9897L32.576 45.3064L35.1947 44.9897C35.1947 39.7239 40.8484 35.4405 47.7978 35.4405C48.6477 35.4405 49.5051 35.4816 50.3452 35.5632L51.1035 33.0588L50.8467 30.3999Z" fill="#7800FF"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M50.347 35.563C51.7889 35.7025 53.2348 35.9631 54.6435 36.3388C56.864 36.9322 59.0084 37.8202 61.0155 38.9798C63.0301 40.144 64.8737 41.5554 66.4959 43.174C67.5162 44.1935 68.4629 45.3114 69.3094 46.4965L73.5386 43.4832C72.5264 42.0666 71.3924 40.7281 70.1685 39.506C68.2276 37.5678 66.0228 35.8803 63.6168 34.4891C61.2144 33.102 58.6467 32.038 55.9845 31.3265C54.3003 30.8784 52.5709 30.5664 50.8456 30.3997L50.347 35.563Z" fill="url(#paint1_footer_logo)"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M66.4957 46.8045C64.8748 48.4225 63.0312 49.8339 61.0154 50.9987C59.0083 52.1583 56.8638 53.0475 54.644 53.6397L54.9472 56.1453L55.9849 58.6508C58.6465 57.9405 61.2148 56.877 63.6167 55.4894C66.0244 54.0977 68.228 52.4101 70.169 50.4725C72.1129 48.5308 73.8034 46.3315 75.1925 43.9336L70.6954 41.3354C69.533 43.3419 68.1196 45.1817 66.4957 46.8045Z" fill="url(#paint2_footer_logo)"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M71.3122 21.1719L69.4436 23.0823L68.7149 25.6643C73.281 28.2972 74.1692 35.3282 70.6947 41.3373L72.6108 43.1181L75.1936 43.9315C80.1005 35.4445 78.359 25.2347 71.3122 21.1719Z" fill="#006EFF"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M258 58.036V46.91C258 42.5595 255.4 39.4216 250.93 39.4216C247.708 39.4216 245.731 41.0975 244.554 43.2374V39.8499H242.856V58.036H244.554V47.5166C244.554 43.7364 247.223 41.0268 250.688 41.0268C254.257 41.0268 256.301 43.4863 256.301 47.2314V58.036H258ZM234.262 34.3939H236.376V32.0045H234.262V34.3939ZM226.468 58.036H228.131V46.6962C228.131 44.4493 227.507 42.774 226.329 41.5615C225.047 40.2414 223.141 39.5648 220.751 39.5648C218.324 39.5648 216.419 40.2064 214.478 41.1332L215.102 42.6671C216.73 41.811 218.498 41.2044 220.646 41.2044C224.285 41.2044 226.468 43.0948 226.468 46.768V47.5522C224.769 47.0882 223.072 46.768 220.611 46.768C216.036 46.768 212.883 48.9073 212.883 52.6869V52.7582C212.883 56.5383 216.419 58.4638 219.71 58.4638C223.072 58.4638 225.255 56.7522 226.468 55.0044V58.036ZM226.503 51.2249C226.503 54.541 223.419 56.8235 219.815 56.8235C217.111 56.8235 214.686 55.2902 214.686 52.6512V52.58C214.686 50.048 216.765 48.3364 220.508 48.3364C223.037 48.3364 225.013 48.7648 226.503 49.1569V51.2249ZM210.702 41.4902H210.875V39.5648C207.375 39.4216 204.43 41.7754 203.043 45.0208V39.8499H201.345V58.036H203.043V50.5832C203.043 44.6638 206.613 41.4902 210.702 41.4902ZM196.046 48.943V48.8711C196.046 42.9522 191.715 39.4216 187.451 39.4216C183.952 39.4216 181.699 41.5258 180.174 43.9147V32.0051H178.477V58.036H180.174V54.1133C181.63 56.3958 183.917 58.4638 187.451 58.4638C191.715 58.4638 196.046 54.8618 196.046 48.943ZM194.209 49.0137C194.209 53.8994 191.125 56.7878 187.279 56.7878C183.605 56.7878 180.071 53.6499 180.071 48.9786V48.9073C180.071 44.2717 183.605 41.0975 187.279 41.0975C190.987 41.0975 194.209 44.1648 194.209 48.943V49.0137ZM165.86 40.0723L170.198 37.3391C168.119 33.7136 164.035 31.5 159.355 31.5C151.547 31.5 146.072 37.1711 146.072 44.9997C146.072 52.8283 151.547 58.5 159.355 58.5C163.998 58.5 167.758 56.3806 170.035 52.9962L165.914 49.9459C164.397 52.2332 162.138 53.517 159.319 53.517C154.856 53.517 151.332 50.2256 151.332 44.9997C151.332 39.9424 154.747 36.4836 159.319 36.4836C162.157 36.4836 164.415 37.8224 165.86 40.0723ZM141.285 58.0161L137.076 46.8895C139.837 45.6534 141.285 43.2374 141.285 39.9055C141.285 34.9225 138.05 31.9839 132.015 31.9839H121.1V58.0161H126.359V47.8271H132.046L135.9 58.0161H141.285ZM136.099 39.9055C136.099 42.0816 134.617 43.0483 131.924 43.0483H126.359V36.7627H131.924C134.617 36.7627 136.099 37.7294 136.099 39.9055ZM110.456 58.0173H115.841L105.992 31.9839H99.8485L90 58.0173H95.2589L97.4636 51.954H108.252L110.456 58.0173ZM106.518 47.1758H99.1979L102.866 37.1162L106.518 47.1758ZM234.47 58.036H236.169V39.8499H234.47V58.036Z" fill="currentColor"/>
+          <defs>
+            <linearGradient id="paint0_footer_logo" x1="46.9073" y1="32.5246" x2="46.9073" y2="57.1043" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#006EFF"/>
+              <stop offset="1" stop-color="#0032D3"/>
+            </linearGradient>
+            <linearGradient id="paint1_footer_logo" x1="41.7464" y1="40.3577" x2="56.7143" y2="57.7588" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#7800FF"/>
+              <stop offset="1" stop-color="#0032D3"/>
+            </linearGradient>
+            <linearGradient id="paint2_footer_logo" x1="64.601" y1="35.6288" x2="49.452" y2="51.547" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#006EFF"/>
+              <stop offset="1" stop-color="#7800FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </a>
+      <p>Multi-Robot, Multi-Facility, One Cloud.<br>Powered by NAVER Cloud Platform.</p>
+    </div>
+    <div class="foot-col">
+      <h5>Product</h5>
+      <ul>
+        <li><a href="#features">Multi-Robot Control</a></li>
+        <li><a href="#features">Facility Integration</a></li>
+        <li><a href="#features">Monitoring</a></li>
+        <li><a href="#features">Map Editor</a></li>
+        <li><a href="#features">Analytics</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>Solutions</h5>
+      <ul>
+        <li><a href="#usecases">Food &amp; Cafe</a></li>
+        <li><a href="#usecases">Parcel Delivery</a></li>
+        <li><a href="#usecases">Warehouse</a></li>
+        <li><a href="#usecases">Office &amp; Hotel</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>Developers</h5>
+      <ul>
+        <li><a href="#">API Reference</a></li>
+        <li><a href="#">MQTT / SDK</a></li>
+        <li><a href="#">Quick Start</a></li>
+        <li><a href="#">Release Notes</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="#trust">About</a></li>
+        <li><a href="#cta">Contact Sales</a></li>
+        <li><a href="#">User Guide</a></li>
+        <li><a href="#">NCP Console</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <div>© 2026 ARC brain · NAVER Cloud Platform</div>
+    <div>KR · EN · JP</div>
+  </div>
+</footer>
+
+<script>
+  // Nav scroll state
+  const nav = document.getElementById('nav');
+  const onScroll = () => {
+    if (window.scrollY > 40) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Responsive navigation
+  const menuButton = document.querySelector('[data-menu-button]');
+  const mobileMenu = document.querySelector('[data-mobile-menu]');
+  const mobileLinks = document.querySelectorAll('.mobile-menu a');
+
+  const closeMenu = () => {
+    if (!menuButton || !mobileMenu) return;
+    document.body.classList.remove('menu-open');
+    nav.classList.remove('open');
+    menuButton.setAttribute('aria-expanded', 'false');
+    menuButton.setAttribute('aria-label', '메뉴 열기');
+  };
+
+  const toggleMenu = () => {
+    if (!menuButton || !mobileMenu) return;
+    const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
+    document.body.classList.toggle('menu-open', !isOpen);
+    nav.classList.toggle('open', !isOpen);
+    menuButton.setAttribute('aria-expanded', String(!isOpen));
+    menuButton.setAttribute('aria-label', isOpen ? '메뉴 열기' : '메뉴 닫기');
+  };
+
+  menuButton?.addEventListener('click', toggleMenu);
+  mobileLinks.forEach(link => link.addEventListener('click', closeMenu));
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu();
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 1360) closeMenu();
+  });
+
+  // Intersection Observer reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  reveals.forEach(el => io.observe(el));
+
+  // Ensure hero video autoplays on iOS
+  const heroVideo = document.querySelector('.hero video');
+  if (heroVideo) {
+    heroVideo.play().catch(() => {});
+  }
+</script>
+
+</body>
+</html>
