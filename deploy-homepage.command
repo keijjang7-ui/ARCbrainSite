@@ -22,7 +22,8 @@ if [[ $COMMIT_STATUS -ne 0 ]]; then
 fi
 
 echo "Pushing to remote..."
-git push
+BRANCH="$(git branch --show-current)"
+git push -u origin "$BRANCH"
 PUSH_STATUS=$?
 
 if [[ $PUSH_STATUS -eq 0 ]]; then
