@@ -1128,18 +1128,35 @@ footer {
     min-height: 54px;
     font-size: 22px;
   }
-  section:not(.hero) { padding: 160px 22px; }
+  section:not(.hero) { padding: 128px 22px; }
   #features,
   #usecases,
   #trust,
-  #cta { padding: 160px 22px; }
+  #cta { padding: 128px 22px; }
   #features { padding-bottom: 0; }
   .hero { min-height: 600px; }
   .hero-content {
     width: calc(100% - 44px);
     padding-left: 0;
+    text-align: center;
   }
   .hero h1 { letter-spacing: -1.2px; }
+  .hero-title-line,
+  .hero-title-part,
+  .hero-title-one {
+    display: block;
+  }
+  .hero-title-separator,
+  .hero-title-break {
+    display: none;
+  }
+  .hero .sub {
+    margin-left: auto;
+    margin-right: auto;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+  .hero .cta-row { justify-content: center; }
   .hero-sub-break { display: none; }
   .section-title { letter-spacing: -1.2px; }
   .problem-lead-break { display: none; }
@@ -1160,14 +1177,24 @@ footer {
   .problem-card { padding: 32px 24px; }
   .uc-card .uc-body { padding: 24px 32px 24px 24px; }
   .trust-badge { padding: 28px; gap: 28px; }
-  .trust-logos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .trust-logos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 72px;
+    row-gap: 12px;
+  }
   .trust-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     min-width: 0;
-    padding-left: 8px;
-    padding-right: 8px;
+    min-height: 72px;
+    padding: 0 8px;
+    line-height: 1.25;
+    text-align: center;
+    word-break: keep-all;
   }
   .trust-logo .sub { display: none; }
-  .mini-feat-section { margin: 160px -22px 0; padding: 160px 22px; }
+  .mini-feat-section { margin: 128px -22px 0; padding: 128px 22px; }
   .foot-grid { grid-template-columns: 1fr; }
   .cta-content p { font-size: 16px; }
 }
@@ -1244,8 +1271,8 @@ footer {
   </video>
   <div class="hero-content">
     <h1 class="reveal delay-1">
-      Multi-Robot, Multi-Facility<br>
-      <span class="gradient">One Cloud</span>
+      <span class="hero-title-line"><span class="hero-title-part">Multi-Robot</span><span class="hero-title-separator">, </span><span class="hero-title-part">Multi-Facility</span></span><br class="hero-title-break">
+      <span class="gradient hero-title-one">One Cloud</span>
     </h1>
     <p class="sub reveal delay-2">
       제조사가 달라도, 층이 달라도, 로봇 수가 늘어나도 여러 로봇과 시설을<br class="hero-sub-break">
