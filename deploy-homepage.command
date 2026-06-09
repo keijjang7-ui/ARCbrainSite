@@ -4,27 +4,26 @@ cd "$(dirname "$0")" || exit 1
 
 echo "Checking homepage changes..."
 
-if [[ -z "$(git status --short)" ]]; then
-  echo "No changes to deploy."
-  exit 0
-fi
-
-echo "Staging changes..."
-git add .
-
-echo "Creating commit..."
-git commit -m "Update homepage"
-COMMIT_STATUS=$?
-
-if [[ $COMMIT_STATUS -ne 0 ]]; then
-  echo "Commit failed. Push skipped."
-  exit $COMMIT_STATUS
-fi
-
 BRANCH="$(git branch --show-current)"
 if [[ -z "$BRANCH" ]]; then
   echo "Could not determine the current git branch."
   exit 1
+fi
+
+if [[ -n "$(git status --short)" ]]; then
+  echo "Staging changes..."
+  git add .
+
+  echo "Creating commit..."
+  git commit -m "Update homepage"
+  COMMIT_STATUS=$?
+
+  if [[ $COMMIT_STATUS -ne 0 ]]; then
+    echo "Commit failed. Push skipped."
+    exit $COMMIT_STATUS
+  fi
+else
+  echo "No file changes to commit."
 fi
 
 echo "Syncing with remote..."
@@ -37,12 +36,13 @@ if [[ $FETCH_STATUS -ne 0 ]]; then
 fi
 
 if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
-  git rebase "origin/$BRANCH"
-  REBASE_STATUS=$?
+  git merge --ff-only "origin/$BRANCH"
+  MERGE_STATUS=$?
 
-  if [[ $REBASE_STATUS -ne 0 ]]; then
-    echo "Rebase failed. Resolve conflicts, then run this command again."
-    exit $REBASE_STATUS
+  if [[ $MERGE_STATUS -ne 0 ]]; then
+    echo "Remote branch has changes that cannot be fast-forwarded automatically."
+    echo "Resolve the git history manually, then run this command again."
+    exit $MERGE_STATUS
   fi
 fi
 
