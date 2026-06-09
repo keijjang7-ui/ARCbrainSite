@@ -21,8 +21,32 @@ if [[ $COMMIT_STATUS -ne 0 ]]; then
   exit $COMMIT_STATUS
 fi
 
-echo "Pushing to remote..."
 BRANCH="$(git branch --show-current)"
+if [[ -z "$BRANCH" ]]; then
+  echo "Could not determine the current git branch."
+  exit 1
+fi
+
+echo "Syncing with remote..."
+git fetch origin "$BRANCH"
+FETCH_STATUS=$?
+
+if [[ $FETCH_STATUS -ne 0 ]]; then
+  echo "Fetch failed. Push skipped."
+  exit $FETCH_STATUS
+fi
+
+if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
+  git rebase "origin/$BRANCH"
+  REBASE_STATUS=$?
+
+  if [[ $REBASE_STATUS -ne 0 ]]; then
+    echo "Rebase failed. Resolve conflicts, then run this command again."
+    exit $REBASE_STATUS
+  fi
+fi
+
+echo "Pushing to remote..."
 git push -u origin "$BRANCH"
 PUSH_STATUS=$?
 
