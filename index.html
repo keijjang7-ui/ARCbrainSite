@@ -477,6 +477,8 @@ section:not(.hero) { padding: 160px 40px; position: relative; }
 
 /* ---------- SOLUTION ---------- */
 #solution {
+  --solution-axis-border: rgba(255,255,255,0.08);
+  --solution-row-line: rgba(255,255,255,0.14);
   background: var(--bg-dark);
   color: #fff;
   overflow: hidden;
@@ -507,7 +509,7 @@ section:not(.hero) { padding: 160px 40px; position: relative; }
   width: 100px;
   height: 1px;
   transform: translateX(-50%);
-  background: rgba(255,255,255,0.08);
+  background: var(--solution-row-line);
 }
 .arch-block {
   background: rgba(255,255,255,0.04);
@@ -567,7 +569,7 @@ section:not(.hero) { padding: 160px 40px; position: relative; }
 .pillar {
   padding: 36px;
   background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--solution-axis-border);
   border-radius: 20px;
   transition: all .3s;
 }
