@@ -3,7 +3,7 @@
 cd "$(dirname "$0")" || exit 1
 
 URL="http://127.0.0.1:8788/text-editor.html"
-PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/Applications/Codex.app/Contents/Resources:$PATH"
+PATH="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin:/Applications/Codex.app/Contents/Resources/cua_node/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/Applications/Codex.app/Contents/Resources:$PATH"
 NODE_BIN="$(command -v node)"
 
 if [[ -z "$NODE_BIN" ]]; then

@@ -445,7 +445,56 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
 
-    const refreshPreview = () => {
+    const getPreviewScroll = () => {
+      try {
+        const previewWindow = previewFrame.contentWindow;
+        const previewDocument = previewWindow.document;
+        const root = previewDocument.documentElement;
+        const body = previewDocument.body;
+        const scrollHeight = Math.max(root.scrollHeight, body?.scrollHeight || 0);
+        const maxY = Math.max(0, scrollHeight - previewWindow.innerHeight);
+
+        return {
+          x: previewWindow.scrollX || root.scrollLeft || body?.scrollLeft || 0,
+          y: previewWindow.scrollY || root.scrollTop || body?.scrollTop || 0,
+          ratio: maxY > 0 ? (previewWindow.scrollY || root.scrollTop || body?.scrollTop || 0) / maxY : 0
+        };
+      } catch {
+        return null;
+      }
+    };
+
+    const restorePreviewScroll = (scroll) => {
+      if (!scroll) return;
+
+      const applyScroll = () => {
+        try {
+          const previewWindow = previewFrame.contentWindow;
+          const previewDocument = previewWindow.document;
+          const root = previewDocument.documentElement;
+          const body = previewDocument.body;
+          const scrollHeight = Math.max(root.scrollHeight, body?.scrollHeight || 0);
+          const maxY = Math.max(0, scrollHeight - previewWindow.innerHeight);
+          const targetY = Math.min(scroll.y, maxY);
+
+          previewWindow.scrollTo(scroll.x, targetY);
+        } catch {
+          // The preview is same-origin in normal use. Ignore restoration if it is unavailable.
+        }
+      };
+
+      requestAnimationFrame(applyScroll);
+      setTimeout(applyScroll, 80);
+      setTimeout(applyScroll, 240);
+    };
+
+    const refreshPreview = (options = {}) => {
+      const scroll = options.scroll || (options.preserveScroll ? getPreviewScroll() : null);
+
+      if (scroll) {
+        previewFrame.addEventListener("load", () => restorePreviewScroll(scroll), { once: true });
+      }
+
       previewFrame.src = `/index.html?preview=${Date.now()}`;
     };
 
@@ -627,6 +676,7 @@
     const saveEntries = async () => {
       saveButton.disabled = true;
       setStatus(saveStatus, "Saving...");
+      const previewScroll = getPreviewScroll();
 
       const entries = state.entries.map((entry) => ({
         id: entry.id,
@@ -653,7 +703,7 @@
         data.changed ? `Saved ${data.updateCount} items` : "No changes",
         "ok"
       );
-      refreshPreview();
+      refreshPreview({ scroll: previewScroll });
       await loadEntries({ quiet: true });
       saveButton.disabled = false;
     };
@@ -667,7 +717,7 @@
       loadEntries().catch((error) => setStatus(saveStatus, error.message, "error"));
     });
 
-    previewButton.addEventListener("click", refreshPreview);
+    previewButton.addEventListener("click", () => refreshPreview({ preserveScroll: true }));
 
     saveButton.addEventListener("click", () => {
       saveEntries().catch((error) => {
