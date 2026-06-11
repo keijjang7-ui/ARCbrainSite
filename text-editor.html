@@ -423,6 +423,19 @@
       footer: "Footer"
     };
 
+    const menuGroupOrder = [
+      "document",
+      "header",
+      "hero",
+      "problem",
+      "solution",
+      "features",
+      "usecases",
+      "trust",
+      "cta",
+      "footer"
+    ];
+
     const editor = document.querySelector("#editor");
     const sectionList = document.querySelector("#sectionList");
     const searchInput = document.querySelector("#searchInput");
@@ -511,13 +524,16 @@
       state.activeGroup === "all" ? entry.group : state.activeGroup;
 
     const sortMenuGroups = (items) => {
-      const footerIndex = items.findIndex((group) => group.key === "footer");
-      if (footerIndex < 0) return items;
+      const originalIndex = new Map(items.map((group, index) => [group.key, index]));
+      const orderIndex = new Map(menuGroupOrder.map((key, index) => [key, index]));
 
-      const sorted = items.slice();
-      const [footer] = sorted.splice(footerIndex, 1);
-      sorted.push(footer);
-      return sorted;
+      return items.slice().sort((a, b) => {
+        const aOrder = orderIndex.has(a.key) ? orderIndex.get(a.key) : Number.MAX_SAFE_INTEGER;
+        const bOrder = orderIndex.has(b.key) ? orderIndex.get(b.key) : Number.MAX_SAFE_INTEGER;
+
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        return originalIndex.get(a.key) - originalIndex.get(b.key);
+      });
     };
 
     const groups = () => {
